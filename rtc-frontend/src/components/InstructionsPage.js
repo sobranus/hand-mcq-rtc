@@ -15,6 +15,11 @@ function InstructionsPage({ onStart }) {
     <div className="container">
       <h1>Quiz Instructions</h1>
       <div className="instructions-content">
+        <video 
+          id="output-video"
+          autoPlay 
+          playsInline
+        />
         {/* Add actual instructions */}
         <p>Please read the following instructions carefully:</p>
         <ul>

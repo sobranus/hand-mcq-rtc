@@ -58,9 +58,11 @@ function QuizPage({ quizData, onQuizComplete }) {
             )}
           </div>
           <div className="video-area">
-            <div className="video-placeholder">
-              Camera feed will appear here
-            </div>
+            <video 
+              id="output-video"
+              autoPlay 
+              playsInline
+            />
           </div>
           <div className="info-bar">
             Use hand gestures to select your answer
