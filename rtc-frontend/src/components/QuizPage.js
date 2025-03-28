@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { globalStream } from "../App";
 
 function QuizPage({ quizData, onQuizComplete }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -6,6 +7,7 @@ function QuizPage({ quizData, onQuizComplete }) {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
 
   useEffect(() => {
+    document.getElementById('output-video').srcObject = globalStream.stream
     const timer = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 0) {

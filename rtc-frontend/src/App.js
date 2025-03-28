@@ -4,6 +4,7 @@ import InstructionsPage from './components/InstructionsPage';
 import QuizPage from './components/QuizPage';
 import CompletePage from './components/CompletePage';
 import './App.css';
+export const globalStream = { stream: null };
 
 function App() {
   const [currentPage, setCurrentPage] = useState('login');
@@ -103,7 +104,8 @@ function App() {
 
 
       pc.addEventListener('track', (evt) => {
-        document.getElementById('output-video').srcObject = evt.streams[0];
+        globalStream.stream = evt.streams[0];
+        document.getElementById('output-video').srcObject = globalStream.stream
       });
       // pc.ontrack = (event) => {
       //   // if (event.track.kind === 'video') {
