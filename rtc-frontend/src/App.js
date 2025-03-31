@@ -9,6 +9,7 @@ export const globalStream = { stream: null };
 function App() {
   const [currentPage, setCurrentPage] = useState('login');
   const [quizData, setQuizData] = useState(null);
+  const [dataChannel, setDataChannel] = useState(null);
   const peerConnection = useRef(null);
   const websocket = useRef(null);
   const connectionInitiated = useRef(false);
@@ -27,11 +28,6 @@ function App() {
 
     socket.onopen = () => {
       console.log('WebSocket connection established with server');
-      return () => {
-        if (websocket.current) {
-          websocket.current.close();
-        }
-      };
     };
     
     socket.onmessage = (event) => {
@@ -56,6 +52,11 @@ function App() {
       
       const pc = new RTCPeerConnection(configuration);
       peerConnection.current = pc;
+
+      const dc = peerConnection.current.createDataChannel("control");
+      dc.onopen = () => console.log("DataChannel is open");
+      dc.onclose = () => console.log("DataChannel closed");
+      setDataChannel(dc);
       
       await navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then((stream) => {
         stream.getTracks().forEach(track => {
@@ -208,6 +209,14 @@ function App() {
     }
   };
 
+  const sendMessage = (message) => {
+    if (dataChannel && dataChannel.readyState === "open") {
+        dataChannel.send(message);
+    } else {
+        console.log("DataChannel is not open yet.");
+    }
+  };
+
 
 
   const handleLogin = (passcode) => {
@@ -223,6 +232,7 @@ function App() {
   const handleStartQuiz = (questions) => {
     setQuizData(questions);
     setCurrentPage('quiz');
+    sendMessage('quiz_start')
   };
 
   const handleQuizComplete = () => {

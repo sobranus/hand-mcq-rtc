@@ -6,9 +6,10 @@ import time
 import csv
 
 import cv2
+from asyncio import ensure_future
 from HandTrackingModule import HandDetector
 from channels.generic.websocket import AsyncWebsocketConsumer
-from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, RTCConfiguration, RTCIceServer, RTCIceGatherer
+from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, RTCConfiguration, RTCIceServer, RTCIceGatherer, RTCDataChannel
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRelay
 from av import VideoFrame
 
@@ -39,6 +40,16 @@ class Data():
             self.chosen_answer = 4
         else:  # Jika 5 jari diangkat
             self.chosen_answer = None
+            
+async def on_datachannel(channel: RTCDataChannel):
+    print(f"DataChannel {channel.label} is open")
+
+    @channel.on("message")
+    async def on_message(message):
+        print(f"Received message: {message}")
+        # Handle the signal (e.g., change a setting, send a response, etc.)
+        if message == "ping":
+            await channel.send("pong")
 
 class VideoTransformTrack(MediaStreamTrack):
     """
@@ -66,6 +77,7 @@ class VideoTransformTrack(MediaStreamTrack):
         self.on_cooldown = True
         self.detected_answer = None
         self.double_detection = False
+        self.only_show = True
         
         self.import_quiz_data("STEM")
 
@@ -76,10 +88,11 @@ class VideoTransformTrack(MediaStreamTrack):
 
         img = cv2.flip(img, 1)
         
-        if not self.process and self.frames % 3 == 0:
-            self.process = True
+        if self.frames % 3 == 0:
             hands, img= self.detector.findHands(img)
-            await self.processing(hands, img)
+            logger.info(f"only_show: {self.only_show}")
+            if self.only_show is False:
+                await self.processing(hands, img)
         self.frames += 1
 
         new_frame = VideoFrame.from_ndarray(img, format="bgr24")
@@ -94,6 +107,10 @@ class VideoTransformTrack(MediaStreamTrack):
         for question in data:
             self.data.append(Data(question))
         self.qTotal = len(data)
+    
+    def quiz_start(self):
+        self.only_show = not self.only_show
+        logger.info(f"QUIZ STARTED, only_show: {self.only_show}")
     
     async def processing(self, hands, img):
         print('processing frame')
@@ -144,6 +161,7 @@ class ServerConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pc = None
+        self.video_track = None
         self.ice_gatherer = None
         self.candidate_received = False
         self.ice_servers = [
@@ -165,12 +183,17 @@ class ServerConsumer(AsyncWebsocketConsumer):
         def on_track(track):
             logger.info(f"Track received from client: {track.kind}")
             if track.kind == "video":
-                self.pc.addTrack(VideoTransformTrack(relay.subscribe(track)))
+                self.video_track = VideoTransformTrack(relay.subscribe(track))
+                self.pc.addTrack(self.video_track)
                 logger.info(f"ADDTRACK DONE")
 
             @track.on("ended")
             async def on_ended():
                 logger.info(f"Track: {track.kind} ended")
+                
+        @self.pc.on("datachannel")
+        def on_datachannel(channel):
+            ensure_future(self.on_datachannel(channel))
                 
         @self.pc.on("connectionstatechange")
         async def on_connection_state_change():
@@ -246,3 +269,12 @@ class ServerConsumer(AsyncWebsocketConsumer):
             await self.pc.addIceCandidate(ice_candidate)
             self.candidate_received = True
             logger.info("added ice candidate")
+            
+    async def on_datachannel(self, channel: RTCDataChannel):
+        logger.info(f"DataChannel {channel.label} is open")
+
+        @channel.on("message")
+        async def on_message(message):
+            logger.info(f"Received message: {message}")
+            if message == "quiz_start":
+                self.video_track.quiz_start()
