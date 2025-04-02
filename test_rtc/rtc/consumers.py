@@ -40,16 +40,7 @@ class Data():
             self.chosen_answer = 4
         else:  # Jika 5 jari diangkat
             self.chosen_answer = None
-            
-async def on_datachannel(channel: RTCDataChannel):
-    print(f"DataChannel {channel.label} is open")
 
-    @channel.on("message")
-    async def on_message(message):
-        print(f"Received message: {message}")
-        # Handle the signal (e.g., change a setting, send a response, etc.)
-        if message == "ping":
-            await channel.send("pong")
 
 class VideoTransformTrack(MediaStreamTrack):
     """
@@ -58,10 +49,11 @@ class VideoTransformTrack(MediaStreamTrack):
 
     kind = "video"
 
-    def __init__(self, track):
+    def __init__(self, track, channel):
         super().__init__()  # don't forget this!
         self.detector = HandDetector(maxHands=1)
         self.track = track
+        self.channel = channel
         self.process = False
         self.frames = 0
         self.data = []
@@ -136,8 +128,10 @@ class VideoTransformTrack(MediaStreamTrack):
                         self.double_detection = False
                         if answer == self.detected_answer:
                             self.qNo += 1
+                            print(self.qNo, self.qTotal)
                             if self.qNo != self.qTotal:
                                 print('next question')
+                                self.channel.send("Server send data channel message")
                             self.on_cooldown = True
                             self.last_execution_time = current_time
                 else:
@@ -161,11 +155,12 @@ class ServerConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pc = None
+        self.channel = None
         self.video_track = None
         self.ice_gatherer = None
         self.candidate_received = False
         self.ice_servers = [
-            RTCIceServer("stun:stun.l.google.com:19302"), 
+            RTCIceServer("stun:stun.l.google.com:19302"),
             RTCIceServer("stun:stun1.l.google.com:19302")
         ]
         
@@ -179,11 +174,13 @@ class ServerConsumer(AsyncWebsocketConsumer):
         
         self.pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=self.ice_servers))
         
+        self.channel = self.pc.createDataChannel('message')
+        
         @self.pc.on("track")
         def on_track(track):
             logger.info(f"Track received from client: {track.kind}")
             if track.kind == "video":
-                self.video_track = VideoTransformTrack(relay.subscribe(track))
+                self.video_track = VideoTransformTrack(relay.subscribe(track), self.channel)
                 self.pc.addTrack(self.video_track)
                 logger.info(f"ADDTRACK DONE")
 
@@ -194,7 +191,7 @@ class ServerConsumer(AsyncWebsocketConsumer):
         @self.pc.on("datachannel")
         def on_datachannel(channel):
             ensure_future(self.on_datachannel(channel))
-                
+            
         @self.pc.on("connectionstatechange")
         async def on_connection_state_change():
             print(f"Connection state: {self.pc.connectionState}")

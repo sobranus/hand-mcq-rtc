@@ -53,7 +53,7 @@ function App() {
       const pc = new RTCPeerConnection(configuration);
       peerConnection.current = pc;
 
-      const dc = peerConnection.current.createDataChannel("control");
+      const dc = peerConnection.current.createDataChannel("signal");
       dc.onopen = () => console.log("DataChannel is open");
       dc.onclose = () => console.log("DataChannel closed");
       setDataChannel(dc);
@@ -102,7 +102,20 @@ function App() {
           }
         }
       };
-
+      
+      pc.ondatachannel = (event) => {
+        const channel = event.channel;
+        
+        // Handle when the channel opens
+        channel.onopen = () => {
+          console.log("Data channel is open");
+        };
+        
+        // Handle incoming messages
+        channel.onmessage = (event) => {
+          console.log("Message from Server:", event.data);
+        };
+      };
 
       pc.addEventListener('track', (evt) => {
         globalStream.stream = evt.streams[0];
