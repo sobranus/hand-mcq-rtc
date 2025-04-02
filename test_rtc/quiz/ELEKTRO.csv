@@ -1,0 +1,4 @@
+question_text,question_image,choice_type,answer,choice1,choice2,choice3,choice4
+What symbol is this?,quiz/images/icons8-polarized-64.png,text,2,Resistor,Capacitor,Inductor,Transistor
+What is this?,quiz/images/icons8-resistor-100.png,text,4,Capacitor,Inductor,Transistor,Resistor
+What symbol is this?,quiz/images/icons8-iron-100.png,text,3,Transistor,Resistor,Inductor,Capacitor
