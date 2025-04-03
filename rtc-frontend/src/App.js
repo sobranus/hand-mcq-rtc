@@ -114,6 +114,7 @@ function App() {
         // Handle incoming messages
         channel.onmessage = (event) => {
           console.log("Message from Server:", event.data);
+          document.getElementById('question-text').textContent = event.data.question;
         };
       };
 

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { globalStream } from "../App";
 
-function QuizPage({ quizData, onQuizComplete }) {
+function QuizPage({ onQuizComplete }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(180);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
 
   useEffect(() => {
     document.getElementById('output-video').srcObject = globalStream.stream
@@ -28,36 +27,22 @@ function QuizPage({ quizData, onQuizComplete }) {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuestion < quizData.length - 1) {
-      setCurrentQuestion(prev => prev + 1);
-      setSelectedAnswer(null);
-    } else {
-      onQuizComplete();
-    }
-  };
-
-  const question = quizData[currentQuestion];
-
   return (
     <div className="container-quiz">
       <div className="quiz-header">
         <div className="question-counter">
-          Question {currentQuestion + 1} of {quizData.length}
+          Question 1
         </div>
         <div className="timer">{formatTime(timeRemaining)}</div>
       </div>
       <div className="quiz-container">
         <div className="left-section">
           <div className="question-area">
-            <div>{question.question}</div>
-            {question.image && (
-              <img 
-                src={question.image} 
-                alt="Question" 
-                className="question-image" 
-              />
-            )}
+            <div id="question-text"></div>
+            <img 
+              alt="Question" 
+              className="question-image" 
+            />
           </div>
           <div className="video-area">
             <video 
@@ -71,16 +56,22 @@ function QuizPage({ quizData, onQuizComplete }) {
           </div>
         </div>
         <div className="right-section">
-          {question.choices.map((choice, index) => (
-            <div 
-              key={index} 
-              className={`choice-box ${selectedAnswer === index ? 'selected' : ''}`}
-              onClick={() => setSelectedAnswer(index)}
-            >
-              <div className="choice-number">{index + 1}</div>
-              <div className="choice-text">{choice}</div>
-            </div>
-          ))}
+          <div className="choice-box" >
+            <div className="choice-number">1</div>
+            <div id="choice1" className="choice-text"></div>
+          </div>
+          <div className="choice-box" >
+            <div className="choice-number">2</div>
+            <div id="choice2" className="choice-text"></div>
+          </div>
+          <div className="choice-box" >
+            <div className="choice-number">3</div>
+            <div id="choice3" className="choice-text"></div>
+          </div>
+          <div className="choice-box" >
+            <div className="choice-number">4</div>
+            <div id="choice4" className="choice-text"></div>
+          </div>
         </div>
       </div>
     </div>

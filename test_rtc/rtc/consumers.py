@@ -102,10 +102,11 @@ class VideoTransformTrack(MediaStreamTrack):
     
     def quiz_start(self):
         self.only_show = not self.only_show
+        self.show_question(self.data[self.qNo])
         logger.info(f"QUIZ STARTED, only_show: {self.only_show}")
         
     async def show_question(self, question):
-        self.channel.send(json.dumps({"question_text": question.question_text,
+        self.channel.send(json.dumps({"question": question.question_text,
                                      "image": question.question_image,
                                      "choice1": question.choice1,
                                      "choice2": question.choice2,

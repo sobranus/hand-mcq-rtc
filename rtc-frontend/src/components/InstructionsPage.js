@@ -29,7 +29,7 @@ function InstructionsPage({ onStart }) {
       </div>
       <button 
         className="button" 
-        onClick={() => onStart(mockQuizQuestions)}
+        onClick={() => onStart()}
       >
         Start Quiz
       </button>
