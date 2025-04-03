@@ -71,7 +71,7 @@ class VideoTransformTrack(MediaStreamTrack):
         self.double_detection = False
         self.only_show = True
         
-        self.import_quiz_data("STEM")
+        self.import_quiz_data("ELEKTRO")
 
     async def recv(self):
         print('recv')
@@ -103,6 +103,14 @@ class VideoTransformTrack(MediaStreamTrack):
     def quiz_start(self):
         self.only_show = not self.only_show
         logger.info(f"QUIZ STARTED, only_show: {self.only_show}")
+        
+    async def show_question(self, question):
+        self.channel.send(json.dumps({"question_text": question.question_text,
+                                     "image": question.question_image,
+                                     "choice1": question.choice1,
+                                     "choice2": question.choice2,
+                                     "choice3": question.choice3,
+                                     "choice4": question.choice4}))
     
     async def processing(self, hands, img):
         print('processing frame')
@@ -131,7 +139,7 @@ class VideoTransformTrack(MediaStreamTrack):
                             print(self.qNo, self.qTotal)
                             if self.qNo != self.qTotal:
                                 print('next question')
-                                self.channel.send("Server send data channel message")
+                                await self.show_question(question)
                             self.on_cooldown = True
                             self.last_execution_time = current_time
                 else:
