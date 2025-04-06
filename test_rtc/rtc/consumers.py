@@ -100,10 +100,9 @@ class VideoTransformTrack(MediaStreamTrack):
             self.data.append(Data(question))
         self.qTotal = len(data)
     
-    def quiz_start(self):
+    async def quiz_start(self):
         self.only_show = not self.only_show
-        self.show_question(self.data[self.qNo])
-        logger.info(f"QUIZ STARTED, only_show: {self.only_show}")
+        await self.show_question(self.data[self.qNo])
         
     async def show_question(self, question):
         self.channel.send(json.dumps({"question": question.question_text,
@@ -140,7 +139,7 @@ class VideoTransformTrack(MediaStreamTrack):
                             print(self.qNo, self.qTotal)
                             if self.qNo != self.qTotal:
                                 print('next question')
-                                await self.show_question(question)
+                                await self.show_question(self.data[self.qNo])
                             self.on_cooldown = True
                             self.last_execution_time = current_time
                 else:
@@ -281,6 +280,5 @@ class ServerConsumer(AsyncWebsocketConsumer):
 
         @channel.on("message")
         async def on_message(message):
-            logger.info(f"Received message: {message}")
             if message == "quiz_start":
-                self.video_track.quiz_start()
+                await self.video_track.quiz_start()

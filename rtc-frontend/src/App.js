@@ -8,12 +8,13 @@ export const globalStream = { stream: null };
 
 function App() {
   const [currentPage, setCurrentPage] = useState('login');
-  const [quizData, setQuizData] = useState(null);
   const [dataChannel, setDataChannel] = useState(null);
   const peerConnection = useRef(null);
   const websocket = useRef(null);
   const connectionInitiated = useRef(false);
   let component_int = useRef(1);
+
+  const [currentQuestion, setCurrentQuestion] = useState('Question');
 
   useEffect(() => {
 
@@ -105,16 +106,10 @@ function App() {
       
       pc.ondatachannel = (event) => {
         const channel = event.channel;
-        
-        // Handle when the channel opens
-        channel.onopen = () => {
-          console.log("Data channel is open");
-        };
-        
-        // Handle incoming messages
         channel.onmessage = (event) => {
-          console.log("Message from Server:", event.data);
-          document.getElementById('question-text').textContent = event.data.question;
+          const quizData = JSON.parse(event.data)
+          console.log("Message from Server:", quizData);
+          setCurrentQuestion(quizData);
         };
       };
 
@@ -244,9 +239,8 @@ function App() {
   };
 
   const handleStartQuiz = (questions) => {
-    setQuizData(questions);
     setCurrentPage('quiz');
-    sendMessage('quiz_start')
+    sendMessage('quiz_start');
   };
 
   const handleQuizComplete = () => {
@@ -255,7 +249,6 @@ function App() {
 
   const handleReset = () => {
     setCurrentPage('login');
-    setQuizData(null);
   };
 
   const renderPage = () => {
@@ -266,8 +259,8 @@ function App() {
         return <InstructionsPage onStart={handleStartQuiz} />;
       case 'quiz':
         return <QuizPage 
-          quizData={quizData}
           onQuizComplete={handleQuizComplete} 
+          question={currentQuestion}
         />;
       case 'complete':
         return <CompletePage onReset={handleReset} />;
