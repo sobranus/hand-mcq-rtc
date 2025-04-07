@@ -15,6 +15,7 @@ function App() {
   let component_int = useRef(1);
 
   const [currentQuestion, setCurrentQuestion] = useState('Question');
+  const [imageData, setImageData] = useState(null);
 
   useEffect(() => {
 
@@ -108,8 +109,8 @@ function App() {
         const channel = event.channel;
         channel.onmessage = (event) => {
           const quizData = JSON.parse(event.data)
-          console.log("Message from Server:", quizData);
           setCurrentQuestion(quizData);
+          setImageData(`data:image/png;base64,${quizData.image}`);
         };
       };
 
@@ -261,6 +262,7 @@ function App() {
         return <QuizPage 
           onQuizComplete={handleQuizComplete} 
           question={currentQuestion}
+          image={imageData}
         />;
       case 'complete':
         return <CompletePage onReset={handleReset} />;

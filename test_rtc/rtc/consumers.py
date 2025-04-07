@@ -4,8 +4,9 @@ import logging
 import os
 import time
 import csv
-
 import cv2
+import base64
+
 from asyncio import ensure_future
 from HandTrackingModule import HandDetector
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -105,8 +106,12 @@ class VideoTransformTrack(MediaStreamTrack):
         await self.show_question(self.data[self.qNo])
         
     async def show_question(self, question):
+        image = cv2.imread(question.question_image)
+        _, buffer = cv2.imencode('.png', image)
+        b64_str = base64.b64encode(buffer).decode('utf-8')
+        
         self.channel.send(json.dumps({"question": question.question_text,
-                                     "image": question.question_image,
+                                     "image": b64_str,
                                      "choice1": question.choice1,
                                      "choice2": question.choice2,
                                      "choice3": question.choice3,

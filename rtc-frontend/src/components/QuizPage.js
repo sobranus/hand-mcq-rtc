@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { globalStream } from "../App";
 
-function QuizPage({ question, imgURL, onQuizComplete }) {
+function QuizPage({ question, image, onQuizComplete }) {
   const [timeRemaining, setTimeRemaining] = useState(180);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ function QuizPage({ question, imgURL, onQuizComplete }) {
           <div className="question-area">
             <div>{question.question}</div>
             <img 
-              src={imgURL} 
+              src={image} 
               alt="image" 
               className="question-image" 
             />
