@@ -109,8 +109,13 @@ function App() {
         const channel = event.channel;
         channel.onmessage = (event) => {
           const quizData = JSON.parse(event.data)
-          setCurrentQuestion(quizData);
-          setImageData(`data:image/png;base64,${quizData.image}`);
+          if (quizData.message == 'quiz_finished') {
+            handleQuizComplete()
+            console.log(quizData.score)
+          } else {
+            setCurrentQuestion(quizData);
+            setImageData(`data:image/png;base64,${quizData.image}`);
+          }
         };
       };
 

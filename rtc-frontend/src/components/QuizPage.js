@@ -36,13 +36,8 @@ function QuizPage({ question, image, onQuizComplete }) {
       </div>
       <div className="quiz-container">
         <div className="left-section">
-          <div className="question-area">
-            <div>{question.question}</div>
-            <img 
-              src={image} 
-              alt="image" 
-              className="question-image" 
-            />
+          <div className="info-bar">
+            Use hand gestures to select your answer
           </div>
           <div className="video-area">
             <video 
@@ -51,8 +46,13 @@ function QuizPage({ question, image, onQuizComplete }) {
               playsInline
             />
           </div>
-          <div className="info-bar">
-            Use hand gestures to select your answer
+          <div className="question-area">
+            <img 
+              src={image} 
+              alt="image" 
+              className="question-image" 
+            />
+            <div><p>{question.question}</p></div>
           </div>
         </div>
         <div className="right-section">

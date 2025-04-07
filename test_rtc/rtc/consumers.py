@@ -110,7 +110,8 @@ class VideoTransformTrack(MediaStreamTrack):
         _, buffer = cv2.imencode('.png', image)
         b64_str = base64.b64encode(buffer).decode('utf-8')
         
-        self.channel.send(json.dumps({"question": question.question_text,
+        self.channel.send(json.dumps({"message": 'new_question',
+                                     "question": question.question_text,
                                      "image": b64_str,
                                      "choice1": question.choice1,
                                      "choice2": question.choice2,
@@ -141,8 +142,13 @@ class VideoTransformTrack(MediaStreamTrack):
                         self.double_detection = False
                         if answer == self.detected_answer:
                             self.qNo += 1
-                            print(self.qNo, self.qTotal)
-                            if self.qNo != self.qTotal:
+                            if self.qNo == self.qTotal:
+                                self.score = sum(1 for data in self.data if data.answer == data.chosen_answer)
+                                self.score = round((self.score / self.qTotal) * 100, 2)
+                                self.channel.send(json.dumps({
+                                    "message": 'quiz_finished',
+                                    "score": self.score}))
+                            else:
                                 print('next question')
                                 await self.show_question(self.data[self.qNo])
                             self.on_cooldown = True
