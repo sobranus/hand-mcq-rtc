@@ -16,6 +16,7 @@ function App() {
 
   const [currentQuestion, setCurrentQuestion] = useState('Question');
   const [imageData, setImageData] = useState(null);
+  const [quizScore, setQuizScore] = useState(0);
 
   useEffect(() => {
 
@@ -109,9 +110,9 @@ function App() {
         const channel = event.channel;
         channel.onmessage = (event) => {
           const quizData = JSON.parse(event.data)
-          if (quizData.message == 'quiz_finished') {
-            handleQuizComplete()
-            console.log(quizData.score)
+          if (quizData.message === 'quiz_finished') {
+            handleQuizComplete();
+            setQuizScore(quizData.score);
           } else {
             setCurrentQuestion(quizData);
             setImageData(`data:image/png;base64,${quizData.image}`);
@@ -254,7 +255,7 @@ function App() {
   };
 
   const handleReset = () => {
-    setCurrentPage('login');
+    window.location.reload();
   };
 
   const renderPage = () => {
@@ -266,11 +267,14 @@ function App() {
       case 'quiz':
         return <QuizPage 
           onQuizComplete={handleQuizComplete} 
-          question={currentQuestion}
-          image={imageData}
+          question={currentQuestion} 
+          image={imageData} 
         />;
       case 'complete':
-        return <CompletePage onReset={handleReset} />;
+        return <CompletePage 
+          score={quizScore}
+          onReset={handleReset}  
+        />;
       default:
         return <LoginPage onLogin={handleLogin} />;
     }
