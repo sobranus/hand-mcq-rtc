@@ -52,10 +52,9 @@ class VideoTransformTrack(MediaStreamTrack):
 
     def __init__(self, track, channel):
         super().__init__()  # don't forget this!
-        self.detector = HandDetector(maxHands=1)
+        self.detector = HandDetector(maxHands=2)
         self.track = track
         self.channel = channel
-        self.process = False
         self.frames = 0
         self.data = []
         self.qNo = 0
@@ -75,7 +74,6 @@ class VideoTransformTrack(MediaStreamTrack):
         self.import_quiz_data("ELEKTRO")
 
     async def recv(self):
-        print('recv')
         frame = await self.track.recv()
         img = frame.to_ndarray(format="bgr24")
 
@@ -83,7 +81,6 @@ class VideoTransformTrack(MediaStreamTrack):
         
         if self.frames % 3 == 0:
             hands, img= self.detector.findHands(img)
-            logger.info(f"only_show: {self.only_show}")
             if self.only_show is False:
                 await self.processing(hands, img)
         self.frames += 1
@@ -119,7 +116,6 @@ class VideoTransformTrack(MediaStreamTrack):
                                      "choice4": question.choice4}))
     
     async def processing(self, hands, img):
-        print('processing frame')
         current_time = time.time()
         if self.on_cooldown:
             if current_time - self.last_execution_time >= self.cooldown_period:
@@ -161,14 +157,12 @@ class VideoTransformTrack(MediaStreamTrack):
             if len(hands) < 2:
                 if self.hands_seen is True:
                     self.hands_unseen -= current_time
-                    print(self.hands_unseen)
                     self.hands_seen = False
             else:
                 if self.hands_seen is False:
                     self.hands_unseen += current_time
                     self.hands_seen = True
-        
-        self.process = False
+            print(self.hands_unseen)
 
 class ServerConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
