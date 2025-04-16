@@ -26,7 +26,7 @@ function App() {
     }
     connectionInitiated.current = true;
 
-    const socket = new WebSocket(`ws://127.0.0.1:8000/ws/rtc/`);
+    const socket = new WebSocket(`wss://super-present-antelope.ngrok-free.app/ws/rtc/`);
     websocket.current = socket;
 
     socket.onopen = () => {
