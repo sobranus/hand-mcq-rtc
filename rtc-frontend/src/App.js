@@ -17,6 +17,7 @@ function App() {
   const [currentQuestion, setCurrentQuestion] = useState('Question');
   const [imageData, setImageData] = useState(null);
   const [quizScore, setQuizScore] = useState(0);
+  const [handUnseen, sethandUnseen] = useState(0);
 
   useEffect(() => {
 
