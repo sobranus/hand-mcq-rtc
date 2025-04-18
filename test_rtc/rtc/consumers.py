@@ -143,7 +143,8 @@ class VideoTransformTrack(MediaStreamTrack):
                                 self.score = round((self.score / self.qTotal) * 100, 2)
                                 self.channel.send(json.dumps({
                                     "message": 'quiz_finished',
-                                    "score": self.score}))
+                                    "score": self.score,
+                                    "hand_unseen": self.hands_unseen}))
                             else:
                                 print('next question')
                                 await self.show_question(self.data[self.qNo])

@@ -114,6 +114,7 @@ function App() {
           if (quizData.message === 'quiz_finished') {
             handleQuizComplete();
             setQuizScore(quizData.score);
+            console.log(quizData.hand_unseen);
           } else {
             setCurrentQuestion(quizData);
             setImageData(`data:image/png;base64,${quizData.image}`);
