@@ -141,6 +141,9 @@ class VideoTransformTrack(MediaStreamTrack):
                             if self.qNo == self.qTotal:
                                 self.score = sum(1 for data in self.data if data.answer == data.chosen_answer)
                                 self.score = round((self.score / self.qTotal) * 100, 2)
+                                if self.hands_seen is False:
+                                    self.hands_unseen += current_time
+                                    self.hands_seen = True
                                 self.channel.send(json.dumps({
                                     "message": 'quiz_finished',
                                     "score": self.score,
@@ -175,16 +178,13 @@ class ServerConsumer(AsyncWebsocketConsumer):
         self.candidate_received = False
         self.ice_servers = [
             RTCIceServer("stun:stun.l.google.com:19302"),
-            RTCIceServer("stun:stun1.l.google.com:19302")
+            RTCIceServer("stun:stun1.l.google.com:19302"),
+            RTCIceServer("turn:relay1.expressturn.com:3478", "ef4D0W10T15FXPIADE", "q5aQSKhZ2swakoCM")
         ]
         
+        
     async def connect(self):
-        logger.info("WebSocket connect attempt received")
         await self.accept()
-        await self.send(text_data=json.dumps({
-            "type": "connected",
-            "message": "Websocket accepted, connected to server",
-            }))
         
         self.pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=self.ice_servers))
         
@@ -196,7 +196,6 @@ class ServerConsumer(AsyncWebsocketConsumer):
             if track.kind == "video":
                 self.video_track = VideoTransformTrack(relay.subscribe(track), self.channel)
                 self.pc.addTrack(self.video_track)
-                logger.info(f"ADDTRACK DONE")
 
             @track.on("ended")
             async def on_ended():
@@ -213,8 +212,6 @@ class ServerConsumer(AsyncWebsocketConsumer):
         @self.pc.on("iceconnectionstatechange")
         def on_ice_connection_state_change():
             print(f"ICE connection state changed: {self.pc.iceConnectionState}")
-        
-        logger.info(f"WebRTC Server's Peer Connection created")
     
     async def disconnect(self):
         logger.info(f"WebSocket disconnected for client")
@@ -240,12 +237,10 @@ class ServerConsumer(AsyncWebsocketConsumer):
                     "type": answer.type #localdesc
                 }
             }))
-            logger.info(f"Answer Sent to Client")
             
             self.ice_gatherer = RTCIceGatherer(iceServers=self.ice_servers)
             await self.ice_gatherer.gather()
             candidates = self.ice_gatherer.getLocalCandidates()
-            logger.info(f"GATHERED:  {candidates}")
             
             if candidates:
                 for candidate in candidates:
@@ -269,7 +264,7 @@ class ServerConsumer(AsyncWebsocketConsumer):
             ice_candidate = RTCIceCandidate(
                 candidate['component'],
                 candidate['foundation'],
-                candidate['address'],
+                candidate['address'].strip("[]"),
                 candidate['port'],
                 candidate['priority'],
                 candidate['protocol'],
@@ -279,11 +274,8 @@ class ServerConsumer(AsyncWebsocketConsumer):
             )
             await self.pc.addIceCandidate(ice_candidate)
             self.candidate_received = True
-            logger.info("added ice candidate")
             
     async def on_datachannel(self, channel: RTCDataChannel):
-        logger.info(f"DataChannel {channel.label} is open")
-
         @channel.on("message")
         async def on_message(message):
             if message == "quiz_start":

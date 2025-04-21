@@ -50,7 +50,12 @@ function App() {
       const configuration = {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' },
+          {
+            urls: 'turn:relay1.expressturn.com:3478',
+            username: 'ef4D0W10T15FXPIADE',
+            credential: 'q5aQSKhZ2swakoCM',
+          },
         ]
       };
       
@@ -175,9 +180,6 @@ function App() {
 
   const handleSignalingData = async (data) => {
     switch (data.type) {
-      case 'connected':
-        console.log('Server confirmed connection: ', data.message);
-        break;
       case 'answer':
         await handleAnswer(data.answer);
         break;
