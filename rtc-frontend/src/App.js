@@ -240,7 +240,7 @@ function App() {
 
 
   const handleLogin = (passcode) => {
-    // Validate passcode (you'd typically do this with backend)
+    // Validate passcode (typically with backend)
     if (passcode === '1234') {
       setCurrentPage('instructions');
       setupPeerConnection();
@@ -249,7 +249,7 @@ function App() {
     }
   };
 
-  const handleStartQuiz = (questions) => {
+  const handleStartQuiz = () => {
     setCurrentPage('quiz');
     sendMessage('quiz_start');
   };
