@@ -17,7 +17,7 @@ function App() {
   const [currentQuestion, setCurrentQuestion] = useState('Question');
   const [imageData, setImageData] = useState(null);
   const [quizScore, setQuizScore] = useState(0);
-  const [handUnseen, sethandUnseen] = useState(0);
+  const [handDown, sethandDown] = useState(0);
 
   useEffect(() => {
 
@@ -119,7 +119,7 @@ function App() {
           if (quizData.message === 'quiz_finished') {
             handleQuizComplete();
             setQuizScore(quizData.score);
-            console.log(quizData.hand_unseen);
+            sethandDown(quizData.hands_unseen.toFixed(2))
           } else {
             setCurrentQuestion(quizData);
             setImageData(`data:image/png;base64,${quizData.image}`);
@@ -277,6 +277,7 @@ function App() {
       case 'complete':
         return <CompletePage 
           score={quizScore}
+          handDownTime={handDown}
           onReset={handleReset}  
         />;
       default:
