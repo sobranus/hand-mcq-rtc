@@ -83,6 +83,7 @@ function App() {
       
       pc.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log(event.candidate)
           if (event.candidate.component === 'rtp') {
             component_int.current = 1
           } else if (event.candidate.component === 'rtcp') {
@@ -93,17 +94,7 @@ function App() {
           try {
             websocket.current.send(JSON.stringify({
               type: 'ice_candidate',
-              candidate: {
-                component: component_int.current,
-                foundation: event.candidate.foundation,
-                address: event.candidate.address,
-                port: event.candidate.port,
-                priority: event.candidate.priority,
-                protocol: event.candidate.protocol,
-                type: event.candidate.type,
-                sdpMid: event.candidate.sdpMid,
-                sdpMLineIndex: event.candidate.sdpMLineIndex,
-              },
+              candidate: event.candidate
             }));
             console.log('Sent ICE candidate to server');
           } catch (error) {
@@ -196,7 +187,6 @@ function App() {
       if (peerConnection.current.signalingState !== "stable") {
         const remoteDesc = new RTCSessionDescription(answer);
         await peerConnection.current.setRemoteDescription(remoteDesc)
-        console.log('Successfully set remote description from server answer');
       } else {
         console.log('Ignoring answer - connection already in stable state');
       }
@@ -222,7 +212,6 @@ function App() {
             sdpMLineIndex: candidate.sdpMLineIndex,
           })
         );
-        console.log('Added ICE candidate from server');
       }
     } catch (error) {
       console.error('Error adding received ICE candidate:', error);

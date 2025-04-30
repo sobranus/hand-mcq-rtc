@@ -244,6 +244,7 @@ class ServerConsumer(AsyncWebsocketConsumer):
             
             if candidates:
                 for candidate in candidates:
+                    logger.info(f"SENT: {candidate}")
                     await self.send(text_data=json.dumps({
                         "type": "ice_candidate",
                         "candidate": {
@@ -260,20 +261,46 @@ class ServerConsumer(AsyncWebsocketConsumer):
                     }))
             
         elif data['type'] == 'ice_candidate':
-            candidate = data.get('candidate')
-            ice_candidate = RTCIceCandidate(
-                candidate['component'],
-                candidate['foundation'],
-                candidate['address'].strip("[]"),
-                candidate['port'],
-                candidate['priority'],
-                candidate['protocol'],
-                candidate['type'],
-                sdpMid=candidate['sdpMid'],
-                sdpMLineIndex=candidate['sdpMLineIndex']
-            )
-            await self.pc.addIceCandidate(ice_candidate)
+            logger.info(f"CAND: {data['candidate']}")
+            candidate = self.parse_ice_candidate(data['candidate'])
+            await self.pc.addIceCandidate(candidate)
             self.candidate_received = True
+            
+    def parse_ice_candidate(self, candidate_obj):
+        if 'candidate' in candidate_obj:
+            candidate_str = candidate_obj['candidate']
+            if len(candidate_str) == 0:
+                return None
+            
+            # Remove the 'candidate:' prefix
+            if candidate_str.startswith('candidate:'):
+                candidate_str = candidate_str[len('candidate:'):]
+
+            parts = candidate_str.split()
+
+            return RTCIceCandidate(
+                foundation=parts[0],
+                component=int(parts[1]),
+                protocol=parts[2],
+                priority=int(parts[3]),
+                ip=parts[4],
+                port=int(parts[5]),
+                type=parts[7],
+                sdpMid=candidate_obj['sdpMid'],
+                sdpMLineIndex=candidate_obj['sdpMLineIndex']
+            )
+        
+        return RTCIceCandidate(
+            foundation=candidate_obj['foundation'],
+            component=int(candidate_obj['component']),
+            protocol=candidate_obj['protocol'],
+            priority=int(candidate_obj['priority']),
+            ip=candidate_obj['address'],
+            port=int(candidate_obj['port']),
+            type=candidate_obj['type'],
+            sdpMid=candidate_obj['sdpMid'],
+            sdpMLineIndex=candidate_obj['sdpMLineIndex']
+        )
             
     async def on_datachannel(self, channel: RTCDataChannel):
         @channel.on("message")
