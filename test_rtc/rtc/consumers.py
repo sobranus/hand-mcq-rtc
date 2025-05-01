@@ -31,27 +31,23 @@ class Data():
         self.chosen_answer = None
 
     def update(self, fingers):
-        if fingers == [0, 1, 0, 0, 0]:  # Jika 1 jari diangkat
+        if fingers == [0, 1, 0, 0, 0]:
             self.chosen_answer = 1
-        elif fingers == [0, 1, 1, 0, 0]:  # Jika 2 jari diangkat
+        elif fingers == [0, 1, 1, 0, 0]:
             self.chosen_answer = 2
-        elif fingers == [0, 1, 1, 1, 0]:  # Jika 3 jari diangkat
+        elif fingers == [0, 1, 1, 1, 0]:
             self.chosen_answer = 3
-        elif fingers == [0, 1, 1, 1, 1]:  # Jika 4 jari diangkat
+        elif fingers == [0, 1, 1, 1, 1]:
             self.chosen_answer = 4
-        else:  # Jika 5 jari diangkat
+        else:
             self.chosen_answer = None
 
 
 class VideoTransformTrack(MediaStreamTrack):
-    """
-    A video stream track that transforms frames from an another track.
-    """
-
     kind = "video"
 
     def __init__(self, track, channel):
-        super().__init__()  # don't forget this!
+        super().__init__()
         self.detector = HandDetector(maxHands=2)
         self.track = track
         self.channel = channel
@@ -272,7 +268,6 @@ class ServerConsumer(AsyncWebsocketConsumer):
             if len(candidate_str) == 0:
                 return None
             
-            # Remove the 'candidate:' prefix
             if candidate_str.startswith('candidate:'):
                 candidate_str = candidate_str[len('candidate:'):]
 
