@@ -1,15 +1,6 @@
 import React from 'react';
 
 function InstructionsPage({ onStart }) {
-  const mockQuizQuestions = [
-    {
-      id: 1,
-      question: 'Sample question 1',
-      choices: ['Choice A', 'Choice B', 'Choice C', 'Choice D'],
-      image: null
-    },
-    // More questions...
-  ];
 
   return (
     <div className="container">

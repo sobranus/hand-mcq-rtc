@@ -22,7 +22,6 @@ function App() {
   useEffect(() => {
 
     if (connectionInitiated.current) {
-      console.log('Connection already initiated, skipping');
       return;
     }
     connectionInitiated.current = true;
@@ -74,12 +73,6 @@ function App() {
       }, (err) => {
         alert('Could not acquire media: ' + err);
       });
-      // const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      // setLocalStream(stream);
-      // document.getElementById('input-video').srcObject = stream;
-      // stream.getTracks().forEach((track) => {
-      //   pc.addTrack(track, stream);
-      // });
       
       pc.onicecandidate = (event) => {
         if (event.candidate) {
@@ -122,20 +115,6 @@ function App() {
         globalStream.stream = evt.streams[0];
         document.getElementById('output-video').srcObject = globalStream.stream
       });
-      // pc.ontrack = (event) => {
-      //   // if (event.track.kind === 'video') {
-      //   //   if (event.streams && event.streams[0]) {
-      //   //     outputVideoRef.current.srcObject = event.streams[0];
-      //   //   }
-      //   // }
-      //   console.log('ontrack');
-      //   event.streams.forEach(stream => {
-      //     stream.getTracks().forEach(track => {
-      //     });
-      //     console.log('displaying remote track');
-      //     document.getElementById('output-video').srcObject = stream[0];
-      //   });
-      // };
 
       pc.oniceconnectionstatechange = () => {
         console.log('ICE connection state:', pc.iceConnectionState);
@@ -151,11 +130,6 @@ function App() {
     try {
       const offer = await peerConnection.current.createOffer()
       await peerConnection.current.setLocalDescription(offer)
-      
-      // await new Promise(resolve => setTimeout(resolve, 100));
-        
-      //   // Check if local description exists before sending
-      // if (peerConnection.current.localDescription) {
       websocket.current.send(JSON.stringify({
           type: 'offer',
           offer: {
@@ -165,7 +139,7 @@ function App() {
       }));
       console.log('Offer sent to server');
     } catch (error) {
-      console.error('Error creating offer:', error);
+      console.error('Error sending offer:', error);
     }
   };
 
