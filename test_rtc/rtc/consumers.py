@@ -10,7 +10,9 @@ import base64
 from asyncio import ensure_future
 from HandTrackingModule import HandDetector
 from channels.generic.websocket import AsyncWebsocketConsumer
-from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, RTCConfiguration, RTCIceServer, RTCIceGatherer, RTCDataChannel
+from aiortc import (MediaStreamTrack, RTCPeerConnection, RTCSessionDescription, 
+                    RTCIceCandidate, RTCConfiguration, RTCIceServer, RTCIceGatherer,
+                    RTCDataChannel)
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRelay
 from av import VideoFrame
 
@@ -171,7 +173,6 @@ class ServerConsumer(AsyncWebsocketConsumer):
         self.channel = None
         self.video_track = None
         self.ice_gatherer = None
-        self.candidate_received = False
         self.ice_servers = [
             RTCIceServer("stun:stun.l.google.com:19302"),
             RTCIceServer("stun:stun1.l.google.com:19302"),
@@ -260,7 +261,6 @@ class ServerConsumer(AsyncWebsocketConsumer):
             logger.info(f"CAND: {data['candidate']}")
             candidate = self.parse_ice_candidate(data['candidate'])
             await self.pc.addIceCandidate(candidate)
-            self.candidate_received = True
             
     def parse_ice_candidate(self, candidate_obj):
         if 'candidate' in candidate_obj:
