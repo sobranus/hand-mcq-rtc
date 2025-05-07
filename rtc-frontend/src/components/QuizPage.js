@@ -58,19 +58,19 @@ function QuizPage({ question, image, onQuizComplete }) {
         <div className="right-section">
           <div className="choice-box" >
             <div className="choice-number">1</div>
-            <div id="choice1" className="choice-text"></div>
+            <div id="choice1" className="choice-text">{question.choice1}</div>
           </div>
           <div className="choice-box" >
             <div className="choice-number">2</div>
-            <div id="choice2" className="choice-text"></div>
+            <div id="choice2" className="choice-text">{question.choice2}</div>
           </div>
           <div className="choice-box" >
             <div className="choice-number">3</div>
-            <div id="choice3" className="choice-text"></div>
+            <div id="choice3" className="choice-text">{question.choice3}</div>
           </div>
           <div className="choice-box" >
             <div className="choice-number">4</div>
-            <div id="choice4" className="choice-text"></div>
+            <div id="choice4" className="choice-text">{question.choice4}</div>
           </div>
         </div>
       </div>
