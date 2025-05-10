@@ -158,10 +158,18 @@ class VideoTransformTrack(MediaStreamTrack):
                     
             if len(hands) < 2:
                 if self.hands_seen is True:
+                    self.channel.send(json.dumps({
+                                    "message": 'hand_unseen',
+                                    "text": 'Show both hands!',
+                                    "color": 'yellow'}))
                     self.hands_unseen -= current_time
                     self.hands_seen = False
             else:
                 if self.hands_seen is False:
+                    self.channel.send(json.dumps({
+                                    "message": 'hand_seen',
+                                    "text": 'Hands detected',
+                                    "color": '#49ff34'}))
                     self.hands_unseen += current_time
                     self.hands_seen = True
             print(self.hands_unseen)
