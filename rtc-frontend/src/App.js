@@ -14,6 +14,9 @@ function App() {
   const connectionInitiated = useRef(false);
   let component_int = useRef(1);
 
+  const [currentInfoBar, setCurrentInfoBar] = useState({
+    text: "Use your hands",
+    color: "yellow"});
   const [currentQuestion, setCurrentQuestion] = useState('Question');
   const [imageData, setImageData] = useState(null);
   const [quizScore, setQuizScore] = useState(0);
@@ -100,13 +103,17 @@ function App() {
         const channel = event.channel;
         channel.onmessage = (event) => {
           const quizData = JSON.parse(event.data)
-          if (quizData.message === 'quiz_finished') {
+          if (quizData.message === 'hand_unseen') {
+            setCurrentInfoBar(quizData)
+          } else if (quizData.message === 'hand_seen') {
+            setCurrentInfoBar(quizData)
+          } else if (quizData.message === 'new_question') {
+            setCurrentQuestion(quizData);
+            setImageData(`data:image/png;base64,${quizData.image}`);
+          } else if (quizData.message === 'quiz_finished') {
             handleQuizComplete();
             setQuizScore(quizData.score);
             sethandDown(quizData.hands_unseen.toFixed(2))
-          } else {
-            setCurrentQuestion(quizData);
-            setImageData(`data:image/png;base64,${quizData.image}`);
           }
         };
       };
@@ -234,6 +241,7 @@ function App() {
       case 'quiz':
         return <QuizPage 
           onQuizComplete={handleQuizComplete} 
+          infoBar={currentInfoBar}
           question={currentQuestion} 
           image={imageData} 
         />;
