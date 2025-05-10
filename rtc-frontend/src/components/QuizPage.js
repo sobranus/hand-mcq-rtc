@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { globalStream } from "../App";
 
-function QuizPage({ question, image, onQuizComplete }) {
+function QuizPage({ infoBar, question, image, onQuizComplete }) {
   const [timeRemaining, setTimeRemaining] = useState(180);
 
   useEffect(() => {
@@ -36,8 +36,8 @@ function QuizPage({ question, image, onQuizComplete }) {
       </div>
       <div className="quiz-container">
         <div className="left-section">
-          <div className="info-bar">
-            Use hand gestures to select your answer
+          <div className="info-bar" style={{ backgroundColor: infoBar.color }}>
+            {infoBar.text}
           </div>
           <div className="video-area">
             <video 
