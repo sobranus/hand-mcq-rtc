@@ -41,6 +41,8 @@ class Data():
             self.chosen_answer = 3
         elif fingers == [0, 1, 1, 1, 1]:
             self.chosen_answer = 4
+        elif fingers == [1, 1, 1, 1, 1]:
+            self.chosen_answer = 5
         else:
             self.chosen_answer = None
 
@@ -135,7 +137,13 @@ class VideoTransformTrack(MediaStreamTrack):
                     elif current_time > self.detection_time + 1:
                         self.double_detection = False
                         if answer == self.detected_answer:
-                            self.qNo += 1
+                            if answer == 5:
+                                self.data[self.qNo].chosen_answer = None
+                                self.qNo = max(self.qNo - 1, 0)
+                                self.data[self.qNo].chosen_answer = None
+                            else:
+                                self.qNo += 1
+                                
                             if self.qNo == self.qTotal:
                                 self.score = sum(1 for data in self.data if data.answer == data.chosen_answer)
                                 self.score = round((self.score / self.qTotal) * 100, 2)
@@ -147,7 +155,6 @@ class VideoTransformTrack(MediaStreamTrack):
                                     "score": self.score,
                                     "hands_unseen": self.hands_unseen}))
                             else:
-                                print('next question')
                                 await self.show_question(self.data[self.qNo])
                             self.on_cooldown = True
                             self.last_execution_time = current_time
