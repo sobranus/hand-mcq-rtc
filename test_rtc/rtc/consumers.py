@@ -41,7 +41,7 @@ class Data():
             self.chosen_answer = 3
         elif fingers == [0, 1, 1, 1, 1]:
             self.chosen_answer = 4
-        elif fingers == [1, 1, 1, 1, 1]:
+        elif fingers == [1, 0, 0, 0, 0]:
             self.chosen_answer = 5
         else:
             self.chosen_answer = None
