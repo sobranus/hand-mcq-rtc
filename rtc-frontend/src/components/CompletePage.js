@@ -11,7 +11,7 @@ function CompletePage({ score, handDownTime, onReset }) {
         Score: {score}/100
       </div>
       <div className="hand-down">
-        Hand down time: {handDownTime} s
+        Hands down time: {handDownTime} s
       </div>
       <button className="button" onClick={onReset}>
         Exit
