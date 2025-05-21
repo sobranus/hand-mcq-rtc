@@ -7,11 +7,9 @@ function CompletePage({ score, handDownTime, onReset }) {
       <div className="completion-message">
         You have successfully completed the quiz!
       </div>
-      <div className="quiz-score">
-        Score: {score}/100
-      </div>
-      <div className="hand-down">
-        Hands down time: {handDownTime} s
+      <div className="completion-message">
+        Score: {score}%
+        <br />Hands down time: {handDownTime} s
       </div>
       <button className="button" onClick={onReset}>
         Exit
