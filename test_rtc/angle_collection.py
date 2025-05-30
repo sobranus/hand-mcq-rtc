@@ -109,6 +109,7 @@ while loop:
     landmarks = detector.findPosition(frame)
     if landmarks:
         angles = collector.compute_finger_angles(landmarks)
+        print(angles)
     
     cv2.imshow("frames", frame)
     
