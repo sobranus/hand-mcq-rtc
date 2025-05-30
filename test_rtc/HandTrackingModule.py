@@ -103,34 +103,18 @@ class HandDetector:
         else:
             return allHands, img
     
-    def findPosition(self, img, handNo=0, draw=True, drawTip=None):
-        xList = []
-        yList = []
-        bbox = []
+    def findPosition(self, img, handNo=0):
+        
+        imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        self.results = self.hands.process(imgRGB)
         self.lmList = []
+        
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNo]
             for id, lm in enumerate(myHand.landmark):
-                h, w, c = img.shape
-                cx, cy = int(lm.x * w), int(lm.y * h)
-                xList.append(cx)
-                yList.append(cy)
-                self.lmList.append([id, cx, cy])
-                if draw:
-                    cv2.circle(img, (cx, cy), 5, (0, 0, 255), cv2.FILLED)
-
-            xmin, xmax = min(xList), max(xList)
-            ymin, ymax = min(yList), max(yList)
-            bbox = xmin, ymin, xmax, ymax
-
-            if draw:
-                cv2.rectangle(img, (xmin - 20, ymin - 20), (xmax + 20, ymax + 20),
-                              (255, 255, 255), 2)
-            if drawTip:
-                cv2.circle(img, (self.lmList[self.tipIds[drawTip]][1], self.lmList[self.tipIds[drawTip]][2]),
-                           5, (0, 255, 0), cv2.FILLED)
+                self.lmList.append([lm.x, lm.y, lm.z])
                 
-        return self.lmList, bbox
+        return self.lmList
 
     def tipsUp(self, myHand):
         """
