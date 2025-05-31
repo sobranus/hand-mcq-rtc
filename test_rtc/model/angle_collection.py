@@ -92,7 +92,7 @@ class GestureDataCollector:
         """Save all collected data"""
         angles_array = np.array(self.angles_data)
         
-        np.save(filename, angles=angles_array)
+        np.save(filename, arr=angles_array)
         
         print(f"Saved {len(self.angles_data)} samples to {filename}")
     
@@ -109,7 +109,6 @@ while loop:
     landmarks = detector.findPosition(frame)
     if landmarks:
         angles = collector.compute_finger_angles(landmarks)
-        print(angles)
     
     cv2.imshow("frames", frame)
     
@@ -119,5 +118,5 @@ while loop:
         counter += 1
         print(f"{counter}. {angles}")
     elif key == ord("e"):
-        collector.save_all('angles.npy')
+        collector.save_all('angles')
         loop = False
