@@ -54,7 +54,7 @@ class GestureDataCollector:
     def __init__(self):
         self.angles_data = []
         
-    def compute_finger_angles(self, landmarks):
+    def exctract_finger_angles(self, landmarks):
         angles = []
         
         # Define connections for each finger (indices of connected landmarks)
@@ -69,20 +69,34 @@ class GestureDataCollector:
         for finger in fingers:
             # Calculate angles at each joint in the finger
             for i in range(1, len(finger)-1):
-                p1 = np.array(landmarks[finger[i-1]])
-                p2 = np.array(landmarks[finger[i]])
-                p3 = np.array(landmarks[finger[i+1]])
+                angle = self.compute_angles(landmarks[finger[i-1]],
+                                    landmarks[finger[i]],
+                                    landmarks[finger[i+1]])
                 
-                # Vectors between points
-                v1 = p1 - p2
-                v2 = p3 - p2
-                
-                # Calculate angle using dot product
-                cosine_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-                angle = np.arccos(np.clip(cosine_angle, -1.0, 1.0))
                 angles.append(angle)
+            
+        for i in range(1, 4):
+            angle = self.compute_angles(landmarks[fingers[i-1][4]],
+                                        landmarks[fingers[i][4]],
+                                        landmarks[fingers[i+1][4]])
+            
+            angles.append(angle)
         
         return np.array(angles)
+    
+    def compute_angles(self, p1, p2, p3):
+        p1 = np.array(p1)
+        p2 = np.array(p2)
+        p3 = np.array(p3)
+        
+        # Vectors between points
+        v1 = p1 - p2
+        v2 = p3 - p2
+        
+        # Calculate angle using dot product
+        cosine_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+        angle = np.arccos(np.clip(cosine_angle, -1.0, 1.0))
+        return angle
     
     def add_sample(self, angles):
         """Add a single gesture sample"""
@@ -108,7 +122,7 @@ while loop:
     frame = add_black_bars_16_9(frame)
     landmarks = detector.findPosition(frame)
     if landmarks:
-        angles = collector.compute_finger_angles(landmarks)
+        angles = collector.exctract_finger_angles(landmarks)
     
     cv2.imshow("frames", frame)
     
