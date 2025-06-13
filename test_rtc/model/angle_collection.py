@@ -95,7 +95,7 @@ class GestureDataCollector:
         
         # Calculate angle using dot product
         cosine_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-        angle = np.arccos(np.clip(cosine_angle, -1.0, 1.0))
+        angle = np.clip(cosine_angle, -1.0, 1.0)
         return angle
     
     def add_sample(self, angles):
