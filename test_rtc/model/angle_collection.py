@@ -132,5 +132,5 @@ while loop:
         counter += 1
         print(f"{counter}. {angles}")
     elif key == ord("e"):
-        collector.save_all('angles')
+        collector.save_all('test_rtc/model/data/angles')
         loop = False
