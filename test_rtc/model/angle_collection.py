@@ -115,16 +115,21 @@ class GestureDataCollector:
 
 collector = GestureDataCollector()
 loop = True
+landmarks = []
 
 while loop:
     ret, frame = cap.read()
     frame = cv2.flip(frame, 1)
     frame = add_black_bars_16_9(frame)
-    landmarks = detector.findPosition(frame)
-    if landmarks:
+    hands, img, handLms = detector.findHands(frame, getLms=True)
+    if handLms:
+        landmarks.clear()
+        for id, lm in enumerate(handLms.landmark):
+            landmarks.append([lm.x, lm.y, lm.z])
         angles = collector.exctract_finger_angles(landmarks)
+            
     
-    cv2.imshow("frames", frame)
+    cv2.imshow("frames", img)
     
     key = cv2.waitKey(1)
     if key == ord("s"):
@@ -132,5 +137,5 @@ while loop:
         counter += 1
         print(f"{counter}. {angles}")
     elif key == ord("e"):
-        collector.save_all('test_rtc/model/data/angles')
+        collector.save_all('test_rtc/model/data/out')
         loop = False
