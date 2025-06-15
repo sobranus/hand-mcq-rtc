@@ -4,7 +4,7 @@ import time
 import cv2
 from HandTrackingModule import HandDetector
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 detector = HandDetector(maxHands=1)
 
 offset = 20
@@ -137,5 +137,5 @@ while loop:
         counter += 1
         print(f"{counter}. {angles}")
     elif key == ord("e"):
-        collector.save_all('test_rtc/model/data/out')
+        collector.save_all('test_rtc/model/data/no')
         loop = False
