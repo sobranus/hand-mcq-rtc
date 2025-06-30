@@ -209,13 +209,13 @@ function App() {
 
 
 
-  const handleLogin = (passcode) => {
-    // Validate passcode (typically with backend)
-    if (passcode === '1234') {
+  const handleLogin = (passcode, userId) => {
+    // Validate user
+    if (passcode === '1234' && userId === 'abcd') {
       setCurrentPage('instructions');
       setupPeerConnection();
     } else {
-      alert('Invalid Passcode');
+      alert('Invalid ID or Passcode!');
     }
   };
 
