@@ -6,7 +6,9 @@
 }
 
 body {
-  background-color: #f5f5f5;
+  background:
+  radial-gradient(ellipse at top, #597fb0, transparent),
+  radial-gradient(ellipse at bottom, #1c2942);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -47,12 +49,39 @@ h1 {
   justify-content: center;
 }
 
+.user_id-section {
+  margin: 40px 0 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+}
 .passcode-section {
-  margin: 40px 0;
+  margin: 20px 0 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
 }
 
+.form-label {
+  text-align: right;
+  margin-right: 10px;
+  white-space: nowrap;
+}
+.invisible-spacer {
+  visibility: hidden;
+  width: 58px;
+}
+.user_id-input {
+  padding: 10px;
+  font-size: 18px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  width: 300px;
+  max-width: 100%;
+  margin-bottom: 5px;
+}
 .passcode-input {
-  padding: 15px;
+  padding: 10px;
   font-size: 18px;
   border: 2px solid #ddd;
   border-radius: 5px;
@@ -79,6 +108,7 @@ h1 {
 /* Page 2 - Instructions */
 #page-instructions {
   display: none;
+  margin: 15px;
 }
 
 .instructions-content {
@@ -87,6 +117,7 @@ h1 {
   border: 1px solid #eee;
   padding: 20px;
   border-radius: 5px;
+  justify-content: center;
 }
 
 /* Page 3 - Quiz */
