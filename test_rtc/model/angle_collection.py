@@ -18,36 +18,26 @@ height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 target_ratio = 16 / 9
 current_ratio = width / height
 
-def add_black_bars_16_9(frame):
-    
+def add_padding(frame):
+    # Dimensi terlalu lebar
     if current_ratio > target_ratio:
-        # Frame is too wide - add black bars on top/bottom (letterbox)
         target_height = int(width / target_ratio)
         padding = (target_height - height) // 2
-        
-        # Create black bars
         top_bar = np.zeros((padding, width, 3), dtype=np.uint8)
         bottom_bar = np.zeros((target_height - height - padding, width, 3), dtype=np.uint8)
-        
-        # Combine
         padded_frame = np.vstack([top_bar, frame, bottom_bar])
         
+    # Dimensi terlalu tinggi
     elif current_ratio < target_ratio:
-        # Frame is too tall - add black bars on left/right (pillarbox)
         target_width = int(height * target_ratio)
         padding = (target_width - width) // 2
-        
-        # Create black bars
         left_bar = np.zeros((height, padding, 3), dtype=np.uint8)
         right_bar = np.zeros((height, target_width - width - padding, 3), dtype=np.uint8)
-        
-        # Combine
         padded_frame = np.hstack([left_bar, frame, right_bar])
-        
-    else:
-        # Already 16:9 ratio
-        padded_frame = frame
     
+    # Dimensi sudah 16:9
+    else:
+        padded_frame = frame
     return padded_frame
 
 class GestureDataCollector:
@@ -89,11 +79,11 @@ class GestureDataCollector:
         p2 = np.array(p2)
         p3 = np.array(p3)
         
-        # Vectors between points
+        # Dua vektor untuk menghitung sudut pada titik p2
         v1 = p1 - p2
         v2 = p3 - p2
         
-        # Calculate angle using dot product
+        # Menghitung cos sudut menggunakan dot product
         cosine_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
         angle = np.clip(cosine_angle, -1.0, 1.0)
         return angle
@@ -120,7 +110,7 @@ landmarks = []
 while loop:
     ret, frame = cap.read()
     frame = cv2.flip(frame, 1)
-    frame = add_black_bars_16_9(frame)
+    frame = add_padding(frame)
     hands, img, handLms = detector.findHands(frame, getLms=True)
     if handLms:
         landmarks.clear()
