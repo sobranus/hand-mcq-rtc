@@ -64,6 +64,8 @@ class VideoTransformTrack(MediaStreamTrack):
         self.last_execution_time = time.time()
         self.detection_time = time.time()
         self.hands_unseen = float()
+        self.handsin = []
+        self.handsout = []
         self.cooldown_period = 1
         self.hands_seen = True
         self.on_cooldown = True
@@ -148,8 +150,13 @@ class VideoTransformTrack(MediaStreamTrack):
                                 self.score = sum(1 for data in self.data if data.answer == data.chosen_answer)
                                 self.score = round((self.score / self.qTotal) * 100, 2)
                                 if self.hands_seen is False:
-                                    self.hands_unseen += current_time
+                                    self.handsin.append(current_time)
                                     self.hands_seen = True
+                                print(self.handsin)
+                                print(self.handsout)
+                                for i in range(len(self.handsin)):
+                                    self.hands_unseen -= self.handsout[i]
+                                    self.hands_unseen += self.handsin[i]
                                 self.channel.send(json.dumps({
                                     "message": 'quiz_finished',
                                     "score": self.score,
@@ -169,7 +176,7 @@ class VideoTransformTrack(MediaStreamTrack):
                                     "message": 'hand_unseen',
                                     "text": 'Show both hands!',
                                     "color": 'yellow'}))
-                    self.hands_unseen -= current_time
+                    self.handsout.append(current_time)
                     self.hands_seen = False
             else:
                 if self.hands_seen is False:
@@ -177,9 +184,8 @@ class VideoTransformTrack(MediaStreamTrack):
                                     "message": 'hand_seen',
                                     "text": 'Hands detected',
                                     "color": '#49ff34'}))
-                    self.hands_unseen += current_time
+                    self.handsin.append(current_time)
                     self.hands_seen = True
-            print(self.hands_unseen)
 
 class ServerConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
