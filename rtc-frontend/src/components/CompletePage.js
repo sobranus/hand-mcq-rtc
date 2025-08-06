@@ -9,7 +9,7 @@ function CompletePage({ score, handDownTime, onReset }) {
       </div>
       <div className="completion-message">
         Score: {score}%
-        <br />Hands down time: {handDownTime} s
+        <br />Hands down detected: {handDownTime} s
       </div>
       <button className="button" onClick={onReset}>
         Exit
