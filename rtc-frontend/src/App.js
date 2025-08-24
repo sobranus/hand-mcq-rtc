@@ -108,8 +108,10 @@ function App() {
           } else if (quizData.message === 'hand_seen') {
             setCurrentInfoBar(quizData)
           } else if (quizData.message === 'new_question') {
+            console.time("myOperation");
             setCurrentQuestion(quizData);
             setImageData(`data:image/png;base64,${quizData.image}`);
+            console.timeEnd("myOperation");
           } else if (quizData.message === 'quiz_finished') {
             handleQuizComplete();
             setQuizScore(quizData.score);
