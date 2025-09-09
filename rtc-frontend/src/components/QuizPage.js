@@ -30,7 +30,7 @@ function QuizPage({ infoBar, question, image, onQuizComplete }) {
     <div className="container-quiz">
       <div className="quiz-header">
         <div className="question-counter">
-          Question No.
+          {question.qNo}
         </div>
         <div className="timer">{formatTime(timeRemaining)}</div>
       </div>
