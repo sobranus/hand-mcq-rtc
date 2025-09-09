@@ -102,14 +102,16 @@ class VideoTransformTrack(MediaStreamTrack):
     
     async def quiz_start(self):
         self.only_show = not self.only_show
-        await self.show_question(self.data[self.qNo])
+        await self.show_question(self.qNo)
         
-    async def show_question(self, question):
+    async def show_question(self, qNo):
+        question = self.data[qNo]
         image = cv2.imread(question.question_image)
         _, buffer = cv2.imencode('.png', image)
         b64_str = base64.b64encode(buffer).decode('utf-8')
         
         self.channel.send(json.dumps({"message": 'new_question',
+                                     "qNo": f'Question No. {qNo + 1}',
                                      "question": question.question_text,
                                      "image": b64_str,
                                      "choice1": question.choice1,
@@ -162,7 +164,7 @@ class VideoTransformTrack(MediaStreamTrack):
                                     "score": self.score,
                                     "hands_unseen": self.hands_unseen}))
                             else:
-                                await self.show_question(self.data[self.qNo])
+                                await self.show_question(self.qNo)
                             self.on_cooldown = True
                             self.last_execution_time = current_time
                 else:
