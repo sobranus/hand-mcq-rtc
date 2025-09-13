@@ -111,7 +111,7 @@ class VideoTransformTrack(MediaStreamTrack):
         b64_str = base64.b64encode(buffer).decode('utf-8')
         
         self.channel.send(json.dumps({"message": 'new_question',
-                                     "qNo": f'Question No. {qNo + 1}',
+                                     "qNo": f'Question {qNo + 1}',
                                      "question": question.question_text,
                                      "image": b64_str,
                                      "choice1": question.choice1,
