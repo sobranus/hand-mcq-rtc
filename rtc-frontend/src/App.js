@@ -128,7 +128,9 @@ function App() {
           } else if (quizData.message === 'new_question') {
             console.time("myOperation");
             setCurrentQuestion(quizData);
-            setImageData(`data:image/png;base64,${quizData.image}`);
+            if (quizData.image) {
+              setImageData(`data:image/png;base64,${quizData.image}`);
+            }
             console.timeEnd("myOperation");
           } else if (quizData.message === 'quiz_finished') {
             handleQuizComplete();
@@ -186,6 +188,13 @@ function App() {
       case 'ice_candidate':
         handleRemoteICECandidate(data.candidate);
         break;
+      case 'login':
+        if (data.valid == '1') {
+          setCurrentPage('instructions');
+          setupPeerConnection();
+        } else {
+          alert('Invalid ID or Passcode!');
+        }
       default:
         console.warn('Unknown message type:', data.type);
     }
@@ -252,11 +261,15 @@ function App() {
 
   // Validate credentials and move to instructions page
   const handleLogin = (passcode, userId) => {
-    if (passcode === '1234' && userId === 'abcd') {
-      setCurrentPage('instructions');
-      setupPeerConnection();
-    } else {
-      alert('Invalid ID or Passcode!');
+    try {
+      websocket.current.send(JSON.stringify({
+        type: 'login',
+        username: userId,
+        password: passcode
+      }));
+      console.log('Sent Login info to server');
+    } catch (error) {
+      console.error('Error sending Login info:', error);
     }
   };
 

@@ -48,8 +48,7 @@ function QuizPage({ infoBar, question, image, onQuizComplete }) {
           </div>
           <div className="question-area">
             <img 
-              src={image} 
-              alt="image" 
+              src={image}
               className="question-image" 
             />
             <div><p>{question.question}</p></div>
