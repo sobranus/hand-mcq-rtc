@@ -17,13 +17,14 @@ import cv2
 import base64
 
 from asyncio import ensure_future
-from HandTrackingModule import HandDetector # Custom CVZone module for hand detection
+from .HandTrackingModule import HandDetector # Custom CVZone module for hand detection
 from channels.generic.websocket import AsyncWebsocketConsumer
 from aiortc import (MediaStreamTrack, RTCPeerConnection, RTCSessionDescription, 
                     RTCIceCandidate, RTCConfiguration, RTCIceServer, RTCIceGatherer,
                     RTCDataChannel)
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRelay
 from av import VideoFrame
+from channels.db import database_sync_to_async
 
 logger = logging.getLogger(__name__)
 relay = MediaRelay()
@@ -75,7 +76,7 @@ class VideoTransformTrack(MediaStreamTrack):
     """
     kind = "video"
 
-    def __init__(self, track, channel):
+    def __init__(self, track, channel, exam_file):
         super().__init__()
         self.detector = HandDetector(maxHands=2) # CVZone hand detection utility
         self.track = track          # Original incoming webrtc track
@@ -100,7 +101,7 @@ class VideoTransformTrack(MediaStreamTrack):
         self.only_show = True           # True = show video only (to client), no exam processing
         
         # Load quiz data from CSV file
-        self.import_quiz_data("ELEKTRO")
+        self.import_quiz_data(exam_file)
 
     async def recv(self):
         """
@@ -132,7 +133,7 @@ class VideoTransformTrack(MediaStreamTrack):
         """
         Load quiz questions from a CSV file and create Data objects.
         """
-        with open(f'quiz/{quiz_name}.csv', newline='') as file:
+        with open(f'quiz/{quiz_name}', newline='') as file:
             reader = csv.DictReader(file)
             data = list(reader)
         for question in data:
@@ -151,9 +152,12 @@ class VideoTransformTrack(MediaStreamTrack):
         Send the current question (text + image) to the client over the webrtc data channel.
         """
         question = self.data[qNo]
-        image = cv2.imread(question.question_image)
-        _, buffer = cv2.imencode('.png', image)
-        b64_str = base64.b64encode(buffer).decode('utf-8')
+        if question.question_image:
+            image = cv2.imread(question.question_image)
+            _, buffer = cv2.imencode('.png', image)
+            b64_str = base64.b64encode(buffer).decode('utf-8')
+        else:
+            b64_str = None
         
         self.channel.send(json.dumps({"message": 'new_question',
                                      "qNo": f'Question {qNo + 1}',
@@ -290,6 +294,10 @@ class ServerConsumer(AsyncWebsocketConsumer):
         Called when a WebSocket connection is opened.
         Initializes RTCPeerConnection and event handlers.
         """
+        from .models import Users, Exams
+        self.users = Users
+        self.exams = Exams
+        self.exam_file = 'Electrical.csv'
         await self.accept()
         
         self.pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=self.ice_servers))
@@ -302,7 +310,7 @@ class ServerConsumer(AsyncWebsocketConsumer):
             logger.info(f"Track received from client: {track.kind}")
             if track.kind == "video":
                 # Wrap incoming video track for processing
-                self.video_track = VideoTransformTrack(relay.subscribe(track), self.channel)
+                self.video_track = VideoTransformTrack(relay.subscribe(track), self.channel, self.exam_file)
                 self.pc.addTrack(self.video_track)
 
             @track.on("ended")
@@ -383,6 +391,55 @@ class ServerConsumer(AsyncWebsocketConsumer):
             logger.info(f"CAND: {data['candidate']}")
             candidate = self.parse_ice_candidate(data['candidate'])
             await self.pc.addIceCandidate(candidate)
+        
+        elif data['type'] == 'login':
+            try:
+                username = data['username']
+                password = data['password']
+                logger.info(f"LOGIN: {username + password}")
+                
+                if not username or not password:
+                    await self.send_error("Username and password are required.")
+                    validity = '0'
+                else:
+                    exam_file_path = await self.authenticate_and_get_exam(username, password)
+                    
+                if exam_file_path:
+                    self.exam_file = exam_file_path
+                    validity = '1'
+                else:
+                    validity = '0'
+                await self.send(text_data=json.dumps({
+                    'type': 'login',
+                    'valid': validity
+                }))
+
+            except json.JSONDecodeError:
+                await self.send_error("Invalid JSON format.")
+
+            
+    @database_sync_to_async
+    def authenticate_and_get_exam(self, username, password):
+        """
+        Synchronous database logic wrapped for async usage.
+        1. Finds the user.
+        2. Checks the password.
+        3. Fetches the corresponding exam file.
+        Returns the exam file string on success, or None on failure.
+        """
+        try:
+            user = self.users.objects.get(Username=username)
+            if user.Password == password:
+                try:
+                    exam = self.exams.objects.get(ExamId=user.UserExamId)
+                    return exam.ExamFile
+                except self.exams.DoesNotExist:
+                    return None
+            else:
+                return None
+
+        except self.users.DoesNotExist:
+            return None
             
     def parse_ice_candidate(self, candidate_obj):
         """
