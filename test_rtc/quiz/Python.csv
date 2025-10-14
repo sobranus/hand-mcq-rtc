@@ -1,0 +1,4 @@
+question_text,question_image,choice_type,answer,choice1,choice2,choice3,choice4
+What symbol is this?,,text,2,Resistor,Capacitor,Inductor,Transistor
+What is this?,,text,4,Capacitor,Inductor,Transistor,Resistor
+What symbol is this?,,text,3,Transistor,Resistor,Inductor,Capacitor
