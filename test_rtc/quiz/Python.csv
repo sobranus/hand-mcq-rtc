@@ -1,4 +1,4 @@
 question_text,question_image,choice_type,answer,choice1,choice2,choice3,choice4
-What symbol is this?,,text,2,Resistor,Capacitor,Inductor,Transistor
-What is this?,,text,4,Capacitor,Inductor,Transistor,Resistor
-What symbol is this?,,text,3,Transistor,Resistor,Inductor,Capacitor
+What is the correct syntax to create an empty dictionary in Python?,,text,2,[],{},dict[],empty()
+What will be the output of the following code?,quiz/images/q2.png,text,1,4,3,2,error
+What does the pop() method do in a Python list?,,text,3,Adds an element to the list,Removes the first element,Removes and returns the last element,Clears all elements in the list
