@@ -130,6 +130,8 @@ function App() {
             setCurrentQuestion(quizData);
             if (quizData.image) {
               setImageData(`data:image/png;base64,${quizData.image}`);
+            } else {
+              setImageData(null);
             }
             console.timeEnd("myOperation");
           } else if (quizData.message === 'quiz_finished') {
